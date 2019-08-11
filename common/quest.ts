@@ -6,19 +6,49 @@ class Quest {
         DestroyQuest(this.quest);
     }
 
-    questSetTitle(title: string): void
-    questSetDescription(description: string): void
-    questSetIconPath(iconPath: string): void
-    questSetRequired(required: boolean): void
-    questSetCompleted(completed: boolean): void
-    questSetDiscovered(discovered: boolean): void
-    questSetFailed(failed: boolean): void
-    questSetEnabled(enabled: boolean): void
-    required(): boolean
-    completed(): boolean
-    discovered(): boolean
-    failed(): boolean
-    enabled(): boolean
+    quest: quest;
+
+    setTitle(title: string): void {
+        QuestSetTitle(this.quest, title);
+    }
+    setDescription(description: string): void {
+        QuestSetDescription(this.quest, description);
+    }
+    setIconPath(iconPath: string): void {
+        QuestSetIconPath(this.quest, iconPath);
+    }
+
+    required(): boolean {
+        return IsQuestRequired(this.quest);
+    }
+    setRequired(required: boolean): void {
+        QuestSetRequired(this.quest, required);
+    }
+    completed(): boolean {
+        return IsQuestCompleted(this.quest);
+    }
+    setCompleted(completed: boolean): void {
+        QuestSetCompleted(this.quest, completed);
+    }
+    discovered(): boolean {
+        return IsQuestDiscovered(this.quest);
+    }
+    setDiscovered(discovered: boolean): void {
+        QuestSetDiscovered(this.quest, discovered);
+    }
+    failed(): boolean {
+        return IsQuestFailed(this.quest);
+    }
+
+    setFailed(failed: boolean): void {
+        QuestSetFailed(this.quest, failed);
+    }
+    enabled(): boolean {
+        return IsQuestEnabled(this.quest);
+    }
+    setEnabled(enabled: boolean): void {
+        QuestSetEnabled(this.quest, enabled);
+    }
 
     flashDialogButton(): void {
         FlashQuestDialogButton()
@@ -29,11 +59,24 @@ class Quest {
 }
 
 class QuestItem {
-    static create(whichQuest : Quest): questitem
+    static create(whichQuest : Quest): QuestItem {
+        return new QuestItem(QuestCreateItem(whichQuest.quest));
+    }
+    constructor(item: questitem) {
+        this.item = item;
+    }
 
-    setDescription(description: string): void
-    setCompleted(completed: boolean): void
-    completed(): boolean
+    item: questitem;
+
+    setDescription(description: string): void {
+        QuestItemSetDescription(this.item, description);
+    }
+    completed(): boolean {
+        return IsQuestItemCompleted(this.item);
+    }
+    setCompleted(completed: boolean): void {
+        QuestItemSetCompleted(this.item, completed);
+    }
 }
 
 class DefeatCondition {
@@ -41,8 +84,12 @@ class DefeatCondition {
         this.cond = CreateDefeatCondition();
     }
     destroy(): void {
-        DestroyDefeatCondition(this.cond)
+        DestroyDefeatCondition(this.cond);
     }
 
-    setDescription(description: string): void
+    cond: defeatcondition;
+
+    setDescription(description: string): void {
+        DefeatConditionSetDescription(this.cond, description);
+    }
 }

@@ -1,5 +1,4 @@
 import { int } from "./util";
-import { SoundType } from "./audio";
 
 declare enum AbilityIntField {
     ABILITY_IF_BUTTON_POSITION_NORMAL_X,
@@ -752,85 +751,265 @@ declare enum AbilityStringLevelField {
     ABILITY_SLF_SPAWN_UNIT_ID_NSY2
 }
 
-declare class AbilId {
-    static fromInt(): AbilId
-    static fromString(abilityIdString: string): AbilId
+export class BuffId {
+    constructor(id: int) {
+        this.id = id;
+    }
+    static byId(id: int): BuffId {
+        return new BuffId(id);
+    }
 
-    static learnedSkill(): AbilId
-    static learnedSkillLevel(): int
-    static spellAbilityId(): AbilId
-
-    toInt(): int
-    toString(): string
-
-    setAbilityTooltip(tooltip: string, level: int): void
-    setAbilityActivatedTooltip(tooltip: string, level: int): void
-    setAbilityExtendedTooltip(extendedTooltip: string, level: int): void
-    setAbilityActivatedExtendedTooltip(extendedTooltip: string, level: int): void
-    setAbilityResearchTooltip(researchTooltip: string, level: int): void
-    setAbilityResearchExtendedTooltip(researchExtendedTooltip: string, level: int): void
-    tooltip(level: int): string
-    activatedTooltip(level: int): string
-    extendedTooltip(level: int): string
-    activatedExtendedTooltip(level: int): string
-    researchTooltip(level: int): string
-    researchExtendedTooltip(level: int): string
-    setAbilityIcon(iconPath: string): void
-    icon(): string
-    setAbilityActivatedIcon(iconPath: string): void
-    activatedIcon(): string
-    posX(): int
-    posY(): int
-    pos(): [int, int]
-    setAbilityPosX(x: int): void
-    setAbilityPosY(y: int): void
-    setAbilityPosXY(xy: [int, int]): void
-    activatedPosX(): int
-    activatedPosY(): int
-    activatedPos(): [int, int]
-    setAbilityActivatedPosX(x: int): void
-    setAbilityActivatedPosY(y: int): void
-    setAbilityActivatedPosXY(xy: [int, int]): void
+    id: int;
 }
 
-declare class Abil {
-    static spellAbility(): Abil
+export class AbilId {
+    constructor(id: int) {
+        this.id = id;
+    }
+    static byId(id: int): AbilId {
+        return new AbilId(id);
+    }
+    static fromString(abilityIdString: string): AbilId {
+        return this.byId(AbilityId(abilityIdString) as int);
+    }
 
-    manaCost(level: int): number
-    cooldown(level: int): number
-    effect(t: effecttype, index: int): string
-    sound(t: soundtype): string
+    static learnedSkill(): AbilId {
+        return this.byId(GetLearnedSkill() as int);
+    }
+    static learnedSkillLevel(): int {
+        return GetLearnedSkillLevel() as int;
+    }
+    static spellAbilityId(): AbilId {
+        return this.byId(GetSpellAbilityId() as int);
+    }
 
-    booleanField(whichField: AbilityBooleanField): boolean
-    intField(whichField: AbilityIntField): number
-    realField(whichField: AbilityRealField): number
-    stringField(whichField: AbilityStringField): string
-    booleanLevelField(whichField: AbilityBooleanLevelField, level: int): boolean
-    intLevelField(whichField: AbilityIntLevelField, level: int): number
-    realLevelField(whichField: AbilityRealLevelField, level: int): number
-    stringLevelField(whichField: AbilityStringLevelField, level: int): string
-    booleanLevelArrayField(whichField: abilitybooleanlevelarrayfield, level: int, index: int): boolean
-    intLevelArrayField(whichField: abilityintegerlevelarrayfield, level: int, index: int): number
-    realLevelArrayField(whichField: abilityreallevelarrayfield, level: int, index: int): number
-    stringLevelArrayField(whichField: abilitystringlevelarrayfield, level: int, index: int): string
-    setBooleanField(whichField: abilitybooleanfield, value: boolean): boolean
-    setIntField(whichField: AbilityIntField, value: number): boolean
-    setRealField(whichField: AbilityRealField, value: number): boolean
-    setStringField(whichField: AbilityStringField, value: string): boolean
-    setBooleanLevelField(whichField: AbilityBooleanLevelField, level: int, value: boolean): boolean
-    setIntLevelField(whichField: AbilityIntLevelField, level: int, value: number): boolean
-    setRealLevelField(whichField: AbilityRealLevelField, level: int, value: number): boolean
-    setStringLevelField(whichField: AbilityStringLevelField, level: int, value: string): boolean
-    setBooleanLevelArrayField(whichField: abilitybooleanlevelarrayfield, level: int, index: int, value: boolean): boolean
-    setIntLevelArrayField(whichField: abilityintegerlevelarrayfield, level: int, index: int, value: number): boolean
-    setRealLevelArrayField(whichField: abilityreallevelarrayfield, level: int, index: int, value: number): boolean
-    setStringLevelArrayField(whichField: abilitystringlevelarrayfield, level: int, index: int, value: string): boolean
-    addBooleanLevelArrayField(whichField: abilitybooleanlevelarrayfield, level: int, value: boolean): boolean
-    addIntLevelArrayField(whichField: abilityintegerlevelarrayfield, level: int, value: number): boolean
-    addRealLevelArrayField(whichField: abilityreallevelarrayfield, level: int, value: number): boolean
-    addStringLevelArrayField(whichField: abilitystringlevelarrayfield, level: int, value: string): boolean
-    removeBooleanLevelArrayField(whichField: abilitybooleanlevelarrayfield, level: int, value: boolean): boolean
-    removeIntLevelArrayField(whichField: abilityintegerlevelarrayfield, level: int, value: number): boolean
-    removeRealLevelArrayField(whichField: abilityreallevelarrayfield, level: int, value: number): boolean
-    removeStringLevelArrayField(whichField: abilitystringlevelarrayfield, level: int, value: string): boolean
+    static FIRST_LEVEL: int = 0 as int;
+
+    id: int;
+
+    toInt(): int {
+        return this.id;
+    }
+    toString(): string {
+        return AbilityId2String(this.id);
+    }
+
+    tooltip(level?: int): string {
+        return BlzGetAbilityTooltip(this.id, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    setTooltip(tooltip: string, level?: int): void {
+        BlzSetAbilityTooltip(this.id, tooltip, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    activatedTooltip(level?: int): string {
+        return BlzGetAbilityActivatedTooltip(this.id, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    setActivatedTooltip(tooltip: string, level?: int): void {
+        BlzSetAbilityActivatedTooltip(this.id, tooltip, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    extendedTooltip(level?: int): string {
+        return BlzGetAbilityExtendedTooltip(this.id, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    setExtendedTooltip(extendedTooltip: string, level?: int): void {
+        BlzSetAbilityExtendedTooltip(this.id, extendedTooltip, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    activatedExtendedTooltip(level?: int): string {
+        return BlzGetAbilityActivatedExtendedTooltip(this.id, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    setActivatedExtendedTooltip(extendedTooltip: string, level?: int): void {
+        BlzSetAbilityActivatedExtendedTooltip(this.id, extendedTooltip, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    researchTooltip(level?: int): string {
+        return BlzGetAbilityResearchTooltip(this.id, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    setResearchTooltip(researchTooltip: string, level?: int): void {
+        BlzSetAbilityResearchTooltip(this.id, researchTooltip, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    researchExtendedTooltip(level: int): string {
+        return BlzGetAbilityResearchExtendedTooltip(this.id, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    setResearchExtendedTooltip(researchExtendedTooltip: string, level?: int): void {
+        BlzSetAbilityResearchExtendedTooltip(this.id, researchExtendedTooltip, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+
+    icon(): string {
+        return BlzGetAbilityIcon(this.id);
+    }
+    setIcon(iconPath: string): void {
+        BlzSetAbilityActivatedIcon(this.id, iconPath);
+    }
+    activatedIcon(): string {
+        return BlzGetAbilityActivatedIcon(this.id);
+    }
+    setActivatedIcon(iconPath: string): void {
+        BlzSetAbilityActivatedIcon(this.id, iconPath);
+    }
+
+    x(): int {
+        return BlzGetAbilityPosX(this.id) as int;
+    }
+    y(): int {
+        return BlzGetAbilityPosY(this.id) as int;
+    }
+    xy(): [int, int] {
+        return [this.x(), this.y()];
+    }
+    setX(x: int): void {
+        BlzSetAbilityPosX(this.id, x);
+    }
+    setY(y: int): void {
+        BlzSetAbilityPosY(this.id, y);
+    }
+    setXY(xy: [int, int]): void {
+        this.setX(xy[0]);
+        this.setY(xy[1]);
+    }
+    activatedX(): int {
+        return BlzGetAbilityActivatedPosX(this.id) as int;
+    }
+    activatedY(): int {
+        return BlzGetAbilityActivatedPosY(this.id) as int;
+    }
+    activatedXY(): [int, int] {
+        return [this.activatedX(), this.activatedY()];
+    }
+    setActivatedX(x: int): void {
+        BlzSetAbilityActivatedPosX(this.id, x);
+    }
+    setActivatedY(y: int): void {
+        BlzSetAbilityActivatedPosY(this.id, y);
+    }
+    setActivatedXY(xy: [int, int]): void {
+        this.setActivatedX(xy[0]);
+        this.setActivatedY(xy[1]);
+    }
+
+    manaCost(level?: int): number {
+        return BlzGetAbilityManaCost(this.id, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    cooldown(level?: int): number {
+        return BlzGetAbilityCooldown(this.id, level == undefined ? AbilId.FIRST_LEVEL : level);
+    }
+    effect(t: effecttype, index: int): string {
+        return GetAbilityEffectById(this.id, t, index);
+    }
+    sound(t: soundtype): string {
+        return GetAbilitySoundById(this.id, t);
+    }
+}
+
+class Abil {
+    constructor(abil: ability) {
+        this.abil = abil;
+    }
+    static spellAbility(): Abil {
+        return new Abil(GetSpellAbility());
+    }
+
+    abil: ability;
+
+    static FIRST_LEVEL: int = 0 as int;
+
+    booleanField(whichField: abilitybooleanfield): boolean {
+        return BlzGetAbilityBooleanField(this.abil, whichField);
+    }
+    intField(whichField: abilityintegerfield): int {
+        return BlzGetAbilityIntegerField(this.abil, whichField) as int;
+    }
+    realField(whichField: abilityrealfield): number {
+        return BlzGetAbilityRealField(this.abil, whichField)
+    }
+    stringField(whichField: abilitystringfield): string {
+        return BlzGetAbilityStringField(this.abil, whichField);
+    }
+
+    booleanLevelField(whichField: abilitybooleanlevelfield, level?: int): boolean {
+        return BlzGetAbilityBooleanLevelField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level);
+    }
+    intLevelField(whichField: abilityintegerlevelfield, level?: int): number {
+        return BlzGetAbilityIntegerLevelField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level);
+    }
+    realLevelField(whichField: abilityreallevelfield, level?: int): number {
+        return BlzGetAbilityRealLevelField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level);
+    }
+    stringLevelField(whichField: abilitystringlevelfield, level?: int): string {
+        return BlzGetAbilityStringLevelField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level);
+    }
+
+    booleanLevelArrayField(whichField: abilitybooleanlevelarrayfield, index: int, level?: int): boolean {
+        return BlzGetAbilityBooleanLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, index);
+    }
+    intLevelArrayField(whichField: abilityintegerlevelarrayfield, index: int, level?: int): int {
+        return BlzGetAbilityIntegerLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, index) as int;
+    }
+    realLevelArrayField(whichField: abilityreallevelarrayfield, index: int, level?: int): number {
+        return BlzGetAbilityRealLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, index);
+    }
+    stringLevelArrayField(whichField: abilitystringlevelarrayfield, index: int, level?: int): string {
+        return BlzGetAbilityStringLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, index);
+    }
+
+    setBooleanField(whichField: abilitybooleanfield, value: boolean): boolean {
+        return BlzSetAbilityBooleanField(this.abil, whichField, value);
+    }
+    setIntField(whichField: abilityintegerfield, value: number): boolean {
+        return BlzSetAbilityIntegerField(this.abil, whichField, value);
+    }
+    setRealField(whichField: abilityrealfield, value: number): boolean {
+        return BlzSetAbilityRealField(this.abil, whichField, value);
+    }
+    setStringField(whichField: abilitystringfield, value: string): boolean {
+        return BlzSetAbilityStringField(this.abil, whichField, value);
+    }
+
+    setBooleanLevelField(whichField: abilitybooleanlevelfield, value: boolean, level?: int): boolean {
+        return BlzSetAbilityBooleanLevelField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    setIntLevelField(whichField: abilityintegerlevelfield, value: number, level?: int): boolean {
+        return BlzSetAbilityIntegerLevelField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    setRealLevelField(whichField: abilityreallevelfield, value: number, level?: int): boolean {
+        return BlzSetAbilityRealLevelField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    setStringLevelField(whichField: abilitystringlevelfield, value: string, level?: int): boolean {
+        return BlzSetAbilityStringLevelField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+
+    setBooleanLevelArrayField(whichField: abilitybooleanlevelarrayfield, index: int, value: boolean, level?: int): boolean {
+        return BlzSetAbilityBooleanLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, index, value);
+    }
+    setIntLevelArrayField(whichField: abilityintegerlevelarrayfield, index: int, value: number, level?: int): boolean {
+        return BlzSetAbilityIntegerLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, index, value);
+    }
+    setRealLevelArrayField(whichField: abilityreallevelarrayfield, index: int, value: number, level?: int): boolean {
+        return BlzSetAbilityRealLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, index, value);
+    }
+    setStringLevelArrayField(whichField: abilitystringlevelarrayfield, index: int, value: string, level?: int): boolean {
+        return BlzSetAbilityStringLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, index, value);
+    }
+
+    addBooleanLevelArrayField(whichField: abilitybooleanlevelarrayfield, value: boolean, level?: int): boolean {
+        return BlzAddAbilityBooleanLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    addIntLevelArrayField(whichField: abilityintegerlevelarrayfield, value: number, level?: int): boolean {
+        return BlzAddAbilityIntegerLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    addRealLevelArrayField(whichField: abilityreallevelarrayfield, value: number, level?: int): boolean {
+        return BlzAddAbilityRealLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    addStringLevelArrayField(whichField: abilitystringlevelarrayfield, value: string, level?: int): boolean {
+        return BlzAddAbilityStringLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+
+    removeBooleanLevelArrayField(whichField: abilitybooleanlevelarrayfield, value: boolean, level?: int): boolean {
+        return BlzRemoveAbilityBooleanLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    removeIntLevelArrayField(whichField: abilityintegerlevelarrayfield, value: number, level?: int): boolean {
+        return BlzRemoveAbilityIntegerLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    removeRealLevelArrayField(whichField: abilityreallevelarrayfield, value: number, level?: int): boolean {
+        return BlzRemoveAbilityRealLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
+    removeStringLevelArrayField(whichField: abilitystringlevelarrayfield, value: string, level?: int): boolean {
+        return BlzRemoveAbilityStringLevelArrayField(this.abil, whichField, level == undefined ? Abil.FIRST_LEVEL : level, value);
+    }
 }

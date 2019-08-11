@@ -1,105 +1,130 @@
-class TerrainDeform {
-    static createCrater(x: number, y: number, radius: number, depth: number, duration: number, permanent: boolean): terraindeformation
-    static createRipple(x: number, y: number, radius: number, depth: number, duration: number, count: number, spaceWaves: number, timeWaves: number, radiusStartPct: number, limitNeg: boolean): terraindeformation
-    static createWave(x: number, y: number, dirX: number, dirY: number, distance: number, speed: number, radius: number, depth: number, trailTime: number, count: number): terraindeformation
-    static createRandom(x: number, y: number, radius: number, minDelta: number, maxDelta: number, duration: number, updateInterval: number): terraindeformation
-    stop(duration: number): void
+import { int, xy, xyz, rgb, rgba } from "./util";
 
-    static terrainDeformStopAll(): void
+class TerrainDeform {
+    static createCrater(xy: xy, radius: number, depth: number, duration: number, permanent: boolean): TerrainDeform {
+        return new TerrainDeform(TerrainDeformCrater(xy[0], xy[1], radius, depth, duration, permanent));
+    }
+    static createRipple(xy: xy, radius: number, depth: number, duration: number, count: number, spaceWaves: number, timeWaves: number, radiusStartPct: number, limitNeg: boolean): TerrainDeform {
+        return new TerrainDeform(TerrainDeformRipple(xy[0], xy[1], radius, depth, duration, count, spaceWaves, timeWaves, radiusStartPct, limitNeg));
+    }
+    static createWave(xy: xy, dirXY: xy, distance: number, speed: number, radius: number, depth: number, trailTime: number, count: number): TerrainDeform {
+        return new TerrainDeform(TerrainDeformWave(xy[0], xy[1], dirXY[0], dirXY[1], distance, speed, radius, depth, trailTime, count));
+    }
+    static createRandom(xy: xy, radius: number, minDelta: number, maxDelta: number, duration: number, updateInterval: number): TerrainDeform {
+        return new TerrainDeform(TerrainDeformRandom(xy[0], xy[1], radius, minDelta, maxDelta, duration, updateInterval));
+    }
+    constructor(deform: terraindeformation) {
+        this.deform = deform;
+    }
+    stop(duration?: number): void {
+        TerrainDeformStop(this.deform, duration == undefined ? 0 : duration);
+    }
+
+    deform: terraindeformation;
+
+    static terrainDeformStopAll(): void {
+        TerrainDeformStopAll();
+    }
 }
 
-declare function terrainCliffLevel(x: number, y: number): number
-declare function terrainCliffLevelXY(xy: [number, number]): number
-declare function setWaterBaseColor(red: number, green: number, blue: number, alpha: number): void
-declare function setWaterDeforms(val: boolean): void
-declare function terrainType(x: number, y: number): int
-declare function terrainTypeXY(xy: [number, number]): int
-declare function terrainVariance(x: number, y: number): int
-declare function setTerrainType(x: number, y: number, terrainType: number, variation: number, area: number, shape: number): void
-declare function isTerrainPathable(x: number, y: number, t: pathingtype): boolean
-declare function setTerrainPathable(x: number, y: number, t: pathingtype, flag: boolean): void
+function terrainCliffLevelXY(xy: xy): number {
+    return GetTerrainCliffLevel(xy[0], xy[1]);
+}
+function setWaterBaseColor(rgba: rgba): void {
+    SetWaterBaseColor(rgba[0], rgba[1], rgba[2], rgba[3]);
+}
+function setWaterDeforms(val: boolean): void {
+    SetWaterDeforms(val);
+}
+function terrainTypeXY(xy: xy): int {
+    return GetTerrainType(xy[0], xy[1]) as int;
+}
+function terrainVarianceXY(xy: xy): int {
+    return GetTerrainVariance(xy[0], xy[1]) as int;
+}
+function setTerrainTypeXY(xy: xy, terrainType: number, variation: number, area: number, shape: number): void {
+    SetTerrainType(xy[0], xy[1], terrainType, variation, area, shape);
+}
+function isTerrainPathableXY(xy: xy, t: pathingtype): boolean {
+    return IsTerrainPathable(xy[0], xy[1], t);
+}
+function setTerrainPathableXY(xy: xy, t: pathingtype, flag: boolean): void {
+    SetTerrainPathable(xy[0], xy[1], t, flag);
+}
 
-declare function setBlight(whichPlayer: player, x: number, y: number, radius: number, addBlight: boolean): void
-declare function setBlightRect(whichPlayer: player, r: rect, addBlight: boolean): void
-declare function setBlightPoint(whichPlayer: player, x: number, y: number, addBlight: boolean): void
-declare function setBlightLoc(whichPlayer: player, whichLocation: location, radius: number, addBlight: boolean): void
-declare function isPointBlighted(x: number, y: number): boolean
+function isBlightedXY(xy: xy): boolean {
+    return IsPointBlighted(xy[0], xy[1]);
+}
+function setBlightXY(whichPlayer: player, xy: xy, addBlight: boolean): void {
+    SetBlightPoint(whichPlayer, xy[0], xy[1], addBlight);
+}
+function setBlightCircle(whichPlayer: player, xy: xy, radius: number, addBlight: boolean): void {
+    SetBlight(whichPlayer, xy[0], xy[1], radius, addBlight);
+}
+function setBlightRect(whichPlayer: player, r: rect, addBlight: boolean): void {
+    SetBlightRect(whichPlayer, r, addBlight);
+}
 
-declare function setDoodadAnimation(x: number, y: number, radius: number, doodadID: number, nearestOnly: boolean, animName: string, animRandom: boolean): void
-declare function setDoodadAnimationRect(r: rect, doodadID: number, animName: string, animRandom: boolean): void
+function setDoodadAnimCircle(xy: xy, radius: number, doodadID: number, nearestOnly: boolean, animName: string, animRandom: boolean): void {
+    SetDoodadAnimation(xy[0], xy[1], radius, doodadID, nearestOnly, animName, animRandom);
+}
+function setDoodadAnimRect(r: rect, doodadID: number, animName: string, animRandom: boolean): void {
+    SetDoodadAnimationRect(r, doodadID, animName, animRandom);
+}
 
 class TerrainFog {
-    constructor(a: number, b: number, c: number, d: number, e: number): void {
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        this.d = d;
-        this.e = e;
-        this.extended = false;
+    static create(style: int, zStartEnd: [number, number], density: number, rgb: rgb): TerrainFog {
+        let self: TerrainFog = new TerrainFog();
+
+        self.style = style;
+        self.zStartEnd = zStartEnd;
+        self.density = density;
+        self.rgb = rgb;
+
+        return self;
     }
-    constructor(style: number, zstart: number, zend: number, density: number, red: number, green: number, blue: number) {
-        this.style = style;
-        this.zStart = zstart;
-        this.zEnd = zend;
-        this.density = density;
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
-        this.extended = true;
+    constructor() {
+        this.style = 0 as int;
+        this.zStartEnd = [0, 0];
+        this.density = 0;
+        this.rgb = [0, 0, 0];
     }
 
+    style: int;
+    zStartEnd: [number, number];
+    density: number;
+    rgb: rgb;
+
     play() {
-        if (this.extended) {
-            SetTerrainFogEx(this.style, this.zStart, this.zEnd, this.density, this.red, this.green, this.blue);
-        } else {
-            SetTerrainFog(this.a, this.b, this.c, this.d, this.e);
-        }
+        SetTerrainFogEx(this.style, this.zStartEnd[0], this.zStartEnd[1], this.density, this.rgb[0], this.rgb[1], this.rgb[2]);
     }
     reset(): void {
         ResetTerrainFog();
     }
-    function setUnit(a: number, b: number, c: number, d: number, e: number): void
+
+    static setUnit(a: number, b: number, c: number, d: number, e: number): void {
+        SetUnitFog(a, b, c, d, e);
+    }
 }
 
-declare class Trackable {
-    constructor(trackableModelPath: string, x: number, y: number, facing: number): trackable {
-        CreateTrackable(trackableModelPath, x, y, facing);
-    }
-
-    static triggeringTrackable(): trackable
+declare enum PathingType {
+    PATHING_TYPE_ANY,
+    PATHING_TYPE_WALKABILITY,
+    PATHING_TYPE_FLYABILITY,
+    PATHING_TYPE_BUILDABILITY,
+    PATHING_TYPE_PEONHARVESTPATHING,
+    PATHING_TYPE_BLIGHTPATHING,
+    PATHING_TYPE_FLOATABILITY,
+    PATHING_TYPE_AMPHIBIOUSPATHING
 }
 
-declare class Image {
-    constructor(file: string, sizeX: number, sizeY: number, sizeZ: number, posX: number, posY: number, posZ: number, originX: number, originY: number, originZ: number, imageType: number): image {
-        this.img = CreateImage(file, sizeX, sizeY, sizeZ, posX, posY, posZ, originX, originY, originZ, imageType);
-    }
-    destroy(): void {
-        DestroyImage(img);
-    }
-
-    show(flag: boolean): void
-    setConstHeight(flag: boolean, height: number): void
-    setPos(x: number, y: number, z: number): void
-    setPosXY(xy: [number, number]): void
-    setPosXYZ(xyz: [number, number, number]): void
-    setColor(red: number, green: number, blue: number, alpha: number): void
-    setRender(flag: boolean): void
-    setRenderAlways(flag: boolean): void
-    setAboveWater(flag: boolean, useWaterAlpha: boolean): void
-    setType(imageType: number): void
-}
-
-declare class Ubersplat {
-    constructor(x: number, y: number, name: string, red: number, green: number, blue: number, alpha: number, forcePaused: boolean, noBirthTime: boolean): ubersplat {
-        this.splat = CreateUbersplat(x, y, name, red, green, blue, alpha, forcePaused, noBirthTime);
-    }
-    destroy(): void {
-        FinishUbersplat(this.splat);
-    }
-
-    reset(): void
-    finish(): void
-    show(flag: boolean): void
-    setRender(flag: boolean): void
-    setRenderAlways(flag: boolean): void
+declare enum PathingFlag {
+    UNWALKABLE,
+    UNFLYABLE,
+    UNBUILDABLE,
+    UNPEONHARVEST,
+    BLIGHTED,
+    UNFLOATABLE,
+    UNAMPHIBIOUS,
+    UNITEMPLACABLE
 }

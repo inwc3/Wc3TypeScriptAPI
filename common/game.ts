@@ -1,40 +1,46 @@
-declare enum StartLocPrio {
-    MAP_LOC_PRIO_LOW: startlocprio
-    MAP_LOC_PRIO_HIGH: startlocprio
-    MAP_LOC_PRIO_NOT: startlocprio
-}
-
-declare enum MapDensity {
-    MAP_DENSITY_NONE: mapdensity
-    MAP_DENSITY_LIGHT: mapdensity
-    MAP_DENSITY_MEDIUM: mapdensity
-    MAP_DENSITY_HEAVY: mapdensity
+declare enum GameEvent {
+    EVENT_GAME_VICTORY,
+    EVENT_GAME_END_LEVEL,
+    EVENT_GAME_VARIABLE_LIMIT,
+    EVENT_GAME_STATE_LIMIT,
+    EVENT_GAME_TIMER_EXPIRED,
+    EVENT_GAME_ENTER_REGION,
+    EVENT_GAME_LEAVE_REGION,
+    EVENT_GAME_TRACKABLE_HIT,
+    EVENT_GAME_TRACKABLE_TRACK,
+    EVENT_GAME_SHOW_SKILL,
+    EVENT_GAME_BUILD_SUBMENU,
+    EVENT_GAME_LOADED,
+    EVENT_GAME_TOURNAMENT_FINISH_SOON,
+    EVENT_GAME_TOURNAMENT_FINISH_NOW,
+    EVENT_GAME_SAVE,
+    EVENT_GAME_CUSTOM_UI_FRAME
 }
 
 declare enum GameDifficulty {
-    MAP_DIFFICULTY_EASY: gamedifficulty
-    MAP_DIFFICULTY_NORMAL: gamedifficulty
-    MAP_DIFFICULTY_HARD: gamedifficulty
-    MAP_DIFFICULTY_INSANE: gamedifficulty
+    MAP_DIFFICULTY_EASY,
+    MAP_DIFFICULTY_NORMAL,
+    MAP_DIFFICULTY_HARD,
+    MAP_DIFFICULTY_INSANE
 }
 
 declare enum GameSpeed {
-    MAP_SPEED_SLOWEST: gamespeed
-    MAP_SPEED_SLOW: gamespeed
-    MAP_SPEED_NORMAL: gamespeed
-    MAP_SPEED_FAST: gamespeed
-    MAP_SPEED_FASTEST: gamespeed
+    MAP_SPEED_SLOWEST,
+    MAP_SPEED_SLOW,
+    MAP_SPEED_NORMAL,
+    MAP_SPEED_FAST,
+    MAP_SPEED_FASTEST
 }
 
 declare enum GameType {
-    GAME_TYPE_MELEE: gametype
-    GAME_TYPE_FFA: gametype
-    GAME_TYPE_USE_MAP_SETTINGS: gametype
-    GAME_TYPE_BLIZ: gametype
-    GAME_TYPE_ONE_ON_ONE: gametype
-    GAME_TYPE_TWO_TEAM_PLAY: gametype
-    GAME_TYPE_THREE_TEAM_PLAY: gametype
-    GAME_TYPE_FOUR_TEAM_PLAY: gametype
+    GAME_TYPE_MELEE,
+    GAME_TYPE_FFA,
+    GAME_TYPE_USE_MAP_SETTINGS,
+    GAME_TYPE_BLIZ,
+    GAME_TYPE_ONE_ON_ONE,
+    GAME_TYPE_TWO_TEAM_PLAY,
+    GAME_TYPE_THREE_TEAM_PLAY,
+    GAME_TYPE_FOUR_TEAM_PLAY
 }
 
 declare enum Version {
@@ -43,86 +49,171 @@ declare enum Version {
 }
 
 declare namespace VersionHelper {
-    declare function VersionGet(): version
-    declare function VersionCompatible(whichVersion: version): boolean
-    declare function VersionSupported(whichVersion: version): boolean
+    function version(): version
+    function versionCompatible(whichVersion: version): boolean
+    function versionSupported(whichVersion: version): boolean
 }
 
-declare function EndGame(doScoreScreen: boolean): void
-declare function ChangeLevel(newLevel: string, doScoreScreen: boolean): void
-declare function RestartGame(doScoreScreen: boolean): void
-declare function ReloadGame(): void
-declare function SetCampaignMenuRace(r: race): void
-declare function SetCampaignMenuRaceEx(campaignIndex: number): void
-declare function ForceCampaignSelectScreen(): void
-declare function LoadGame(saveFileName: string, doScoreScreen: boolean): void
-declare function SaveGame(saveFileName: string): void
-declare function RenameSaveDirectory(sourceDirName: string, destDirName: string): boolean
-declare function RemoveSaveDirectory(sourceDirName: string): boolean
-declare function CopySaveGame(sourceSaveName: string, destSaveName: string): boolean
-declare function SaveGameExists(saveName: string): boolean
-declare function SyncSelections(): void
-declare function SetFloatGameState(whichFloatGameState: fgamestate, value: number): void
-declare function GetFloatGameState(whichFloatGameState: fgamestate): number
-declare function SetIntegerGameState(whichIntegerGameState: igamestate, value: number): void
-declare function GetIntegerGameState(whichIntegerGameState: igamestate): number
-declare function SetTutorialCleared(cleared: boolean): void
-declare function SetMissionAvailable(campaignNumber: number, missionNumber: number, available: boolean): void
-declare function SetCampaignAvailable(campaignNumber: number, available: boolean): void
-declare function SetOpCinematicAvailable(campaignNumber: number, available: boolean): void
-declare function SetEdCinematicAvailable(campaignNumber: number, available: boolean): void
-declare function GetDefaultDifficulty(): gamedifficulty
-declare function SetDefaultDifficulty(g: gamedifficulty): void
-declare function SetCustomCampaignButtonVisible(whichButton: number, visible: boolean): void
-declare function GetCustomCampaignButtonVisible(whichButton: number): boolean
-declare function DoNotSaveReplay(): void
-declare function Cheat(cheatStr: string): void
-declare function IsNoVictoryCheat(): boolean
-declare function IsNoDefeatCheat(): boolean
+function endGame(doScoreScreen: boolean): void {
+    EndGame(doScoreScreen);
+}
+function changeLevel(newLevel: string, doScoreScreen: boolean): void {
+    ChangeLevel(newLevel, doScoreScreen);
+}
+function restartGame(doScoreScreen: boolean): void {
+    RestartGame(doScoreScreen);
+}
+function reloadGame(): void {
+    ReloadGame();
+}
+function setCampaignMenuRace(r: race): void {
+    SetCampaignMenuRace(r);
+}
+function setCampaignMenuRaceEx(campaignIndex: number): void {
+    SetCampaignMenuRaceEx(campaignIndex);
+}
+function forceCampaignSelectScreen(): void {
+    ForceCampaignSelectScreen();
+}
+function loadGame(saveFileName: string, doScoreScreen: boolean): void {
+    LoadGame(saveFileName, doScoreScreen);
+}
+function saveGame(saveFileName: string): void {
+    SaveGame(saveFileName);
+}
+function renameSaveDirectory(sourceDirName: string, destDirName: string): boolean {
+    return RenameSaveDirectory(sourceDirName, destDirName);
+}
+function removeSaveDirectory(sourceDirName: string): boolean {
+    return RemoveSaveDirectory(sourceDirName);
+}
+function copySaveGame(sourceSaveName: string, destSaveName: string): boolean {
+    return CopySaveGame(sourceSaveName, destSaveName);
+}
+function saveGameExists(saveName: string): boolean {
+    return SaveGameExists(saveName);
+}
+function syncSelections(): void {
+    SyncSelections();
+}
 
-declare function SetMapFlag(whichMapFlag: mapflag, value: boolean): void
-declare function SetGamePlacement(whichPlacementType: placement): void
-declare function SetGameSpeed(whichspeed: gamespeed): void
-declare function SetGameDifficulty(whichdifficulty: gamedifficulty): void
+function floatGameState(whichFloatGameState: fgamestate): number {
+    return GetFloatGameState(whichFloatGameState);
+}
+function setFloatGameState(whichFloatGameState: fgamestate, value: number): void {
+    SetFloatGameState(whichFloatGameState, value);
+}
+function intGameState(whichIntegerGameState: igamestate): number {
+    return GetIntegerGameState(whichIntegerGameState);
+}
+function setIntGameState(whichIntegerGameState: igamestate, value: number): void {
+    SetIntegerGameState(whichIntegerGameState, value);
+}
 
-declare function PauseGame(flag: boolean): void
-declare function SetRandomSeed(seed: number): 
+function setTutorialCleared(cleared: boolean): void {
+    SetTutorialCleared(cleared);
+}
+function setMissionAvailable(campaignNumber: number, missionNumber: number, available: boolean): void {
+    SetMissionAvailable(campaignNumber, missionNumber, available);
+}
+function setCampaignAvailable(campaignNumber: number, available: boolean): void {
+    SetCampaignAvailable(campaignNumber, available);
+}
+function setOpCinematicAvailable(campaignNumber: number, available: boolean): void {
+    SetOpCinematicAvailable(campaignNumber, available);
+}
+function setEdCinematicAvailable(campaignNumber: number, available: boolean): void {
+    SetEdCinematicAvailable(campaignNumber, available);
+}
 
-declare function SuspendTimeOfDay(b: boolean): void
-declare function SetTimeOfDayScale(r: number): void
-declare function GetTimeOfDayScale(): number
+function defaultDifficulty(): gamedifficulty {
+    return GetDefaultDifficulty();
+}
+function setDefaultDifficulty(g: gamedifficulty): void {
+    SetDefaultDifficulty(g);
+}
+function setCustomCampaignButtonVisible(whichButton: number, visible: boolean): void {
+    SetCustomCampaignButtonVisible(whichButton, visible);
+}
+function customCampaignButtonVisible(whichButton: number): boolean {
+    return IsCustomCampaignButtonVisibile(whichButton);
+}
+function doNotSaveReplay(): void {
+    DoNotSaveReplay();
+}
+function cheat(cheatStr: string): void {
+    Cheat(cheatStr);
+}
+function isNoVictoryCheat(): boolean {
+    return IsNoVictoryCheat();
+}
+function isNoDefeatCheat(): boolean {
+    return IsNoDefeatCheat();
+}
 
-declare function DisableRestartMission(flag: boolean): void
+function setMapFlag(whichMapFlag: mapflag, value: boolean): void {
+    SetMapFlag(whichMapFlag, value);
+}
+function setGamePlacement(whichPlacementType: placement): void {
+    SetGamePlacement(whichPlacementType);
+}
+function setGameSpeed(whichspeed: gamespeed): void {
+    SetGameSpeed(whichspeed);
+}
+function setGameDifficulty(whichdifficulty: gamedifficulty): void {
+    SetGameDifficulty(whichdifficulty);
+}
+
+function pauseGame(flag: boolean): void {
+    PauseGame(flag);
+}
+function setRandomSeed(seed: number): void {
+    SetRandomSeed(seed);
+}
+
+function suspendTimeOfDay(b: boolean): void {
+    SuspendTimeOfDay(b);
+}
+function timeOfDayScale(): number {
+    return GetTimeOfDayScale();
+}
+function setTimeOfDayScale(r: number): void {
+    return SetTimeOfDayScale(r);
+}
+
+function disableRestartMission(flag: boolean): void {
+    DisableRestartMission(flag);
+}
 
 declare enum MapControl {
-    MAP_CONTROL_USER: mapcontrol
-    MAP_CONTROL_COMPUTER: mapcontrol
-    MAP_CONTROL_RESCUABLE: mapcontrol
-    MAP_CONTROL_NEUTRAL: mapcontrol
-    MAP_CONTROL_CREEP: mapcontrol
-    MAP_CONTROL_NONE: mapcontrol
+    MAP_CONTROL_USER,
+    MAP_CONTROL_COMPUTER,
+    MAP_CONTROL_RESCUABLE,
+    MAP_CONTROL_NEUTRAL,
+    MAP_CONTROL_CREEP,
+    MAP_CONTROL_NONE
 }
 
 declare enum MapFlag {
-    MAP_FOG_HIDE_TERRAIN: mapflag
-    MAP_FOG_MAP_EXPLORED: mapflag
-    MAP_FOG_ALWAYS_VISIBLE: mapflag
-    MAP_USE_HANDICAPS: mapflag
-    MAP_OBSERVERS: mapflag
-    MAP_OBSERVERS_ON_DEATH: mapflag
-    MAP_FIXED_COLORS: mapflag
-    MAP_LOCK_RESOURCE_TRADING: mapflag
-    MAP_RESOURCE_TRADING_ALLIES_ONLY: mapflag
-    MAP_LOCK_ALLIANCE_CHANGES: mapflag
-    MAP_ALLIANCE_CHANGES_HIDDEN: mapflag
-    MAP_CHEATS: mapflag
-    MAP_CHEATS_HIDDEN: mapflag
-    MAP_LOCK_SPEED: mapflag
-    MAP_LOCK_RANDOM_SEED: mapflag
-    MAP_SHARED_ADVANCED_CONTROL: mapflag
-    MAP_RANDOM_HERO: mapflag
-    MAP_RANDOM_RACES: mapflag
-    MAP_RELOADED: mapflag
+    MAP_FOG_HIDE_TERRAIN,
+    MAP_FOG_MAP_EXPLORED,
+    MAP_FOG_ALWAYS_VISIBLE,
+    MAP_USE_HANDICAPS,
+    MAP_OBSERVERS,
+    MAP_OBSERVERS_ON_DEATH,
+    MAP_FIXED_COLORS,
+    MAP_LOCK_RESOURCE_TRADING,
+    MAP_RESOURCE_TRADING_ALLIES_ONLY,
+    MAP_LOCK_ALLIANCE_CHANGES,
+    MAP_ALLIANCE_CHANGES_HIDDEN,
+    MAP_CHEATS,
+    MAP_CHEATS_HIDDEN,
+    MAP_LOCK_SPEED,
+    MAP_LOCK_RANDOM_SEED,
+    MAP_SHARED_ADVANCED_CONTROL,
+    MAP_RANDOM_HERO,
+    MAP_RANDOM_RACES,
+    MAP_RELOADED
 }
 
 declare class Placement {
@@ -132,26 +223,62 @@ declare class Placement {
     MAP_PLACEMENT_TEAMS_TOGETHER: placement
 }
 
-declare enum IGameState : GameState {
-    GAME_STATE_DIVINE_INTERVENTION: igamestate
-    GAME_STATE_DISCONNECTED: igamestate
+declare enum IGameState {
+    GAME_STATE_DIVINE_INTERVENTION,
+    GAME_STATE_DISCONNECTED
 }
 
-declare enum FGameState : GameState {
-    GAME_STATE_TIME_OF_DAY: fgamestate
+declare enum FGameState {
+    GAME_STATE_TIME_OF_DAY
 }
 
-declare function setReservedLocalHeroButtons(reserved: number): void
-declare function allyColorFilterState(): number
-declare function setAllyColorFilterState(state: number): void
-declare function creepCampFilterState(): boolean
-declare function setCreepCampFilterState(state: boolean): void
-declare function enableMinimapFilterButtons(enableAlly: boolean, enableCreep: boolean): void
-declare function enableDragSelect(state: boolean, ui: boolean): void
-declare function enablePreSelect(state: boolean, ui: boolean): void
-declare function enableSelect(state: boolean, ui: boolean): void
+function setReservedLocalHeroButtons(reserved: number): void {
+    SetReservedLocalHeroButtons(reserved);
+}
+function allyColorFilterState(): number {
+    return GetAllyColorFilterState();
+}
+function setAllyColorFilterState(state: number): void {
+    SetAllyColorFilterState(state);
+}
+function creepCampFilterState(): boolean {
+    return GetCreepCampFilterState();
+}
+function setCreepCampFilterState(state: boolean): void {
+    SetCreepCampFilterState(state);
+}
+function enableMinimapFilterButtons(enableAlly: boolean, enableCreep: boolean): void {
+    EnableMinimapFilterButtons(enableAlly, enableCreep);
+}
+function enableDragSelect(state: boolean, ui: boolean): void {
+    EnableDragSelect(state, ui);
+}
+function enablePreSelect(state: boolean, ui: boolean): void {
+    EnablePreSelect(state, ui);
+}
+function enableSelect(state: boolean, ui: boolean): void {
+    EnableSelect(state, ui);
+}
 
-declare function automationSetTestType(testType: string): void
-declare function automationTestStart(testName: string): void
-declare function automationTestEnd(): void
-declare function automationTestingFinished(): void
+function setAutomationTestType(testType: string): void {
+    AutomationSetTestType(testType);
+}
+function startAutomationTest(testName: string): void {
+    AutomationTestStart(testName);
+}
+function endAutomationTest(): void {
+    AutomationTestEnd();
+}
+function finishAutomationTesting(): void {
+    AutomationTestingFinished();
+}
+
+function eventGameState(): gamestate {
+    return GetEventGameState();
+}
+function eventPlayerChatString(): string {
+    return GetEventPlayerChatString();
+}
+function eventPlayerChatStringMatched(): string {
+    return GetEventPlayerChatStringMatched();
+}

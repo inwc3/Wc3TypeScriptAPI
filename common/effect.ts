@@ -39,8 +39,8 @@ class Effect {
     setColorRGB(rgb: rgb): void {
         BlzSetSpecialEffectColor(this.sfx, rgb[0], rgb[1], rgb[2]);
     }
-    setColorRGB(rgba: rgba): void {
-        this.setColorRGB(this.sfx, [rgba[0], rgba[1], rgba[2]]);
+    setColorRGBA(rgba: rgba): void {
+        this.setColorRGB([rgba[0], rgba[1], rgba[2]]);
         this.setAlpha(rgba[3]);
     }
     setColorByPlayer(whichPlayer: player): void {
@@ -157,7 +157,7 @@ class Lightning {
         return [GetLightningColorR(this._bolt), GetLightningColorG(this._bolt), GetLightningColorB(this._bolt), GetLightningColorA(this._bolt)];
     }
     setColorRGBA(rgba: rgba): boolean {
-        SetLightningColor(this._bolt, rgba[0], rgba[1], rgba[2], rgba[3]);
+        return SetLightningColor(this._bolt, rgba[0], rgba[1], rgba[2], rgba[3]);
     }
 }
 

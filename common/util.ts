@@ -22,3 +22,10 @@ function handleId(h: handle): int {
 function stringHash(s: string): int {
     return StringHash(s) as int;
 }
+
+function rgb2rgba(rgb: rgb, a: number) {
+    return rgb.concat(a);
+}
+function rgba2rgb(rgba: rgba) {
+    return rgba.splice(3, 1);
+}

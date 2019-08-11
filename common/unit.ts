@@ -1,8 +1,9 @@
 import { int, xy, xyz, rgba } from "./util";
 import { circle, angle } from "./math";
 import { orderId } from "./order";
-import { AbilId } from "./ability";
+import { AbilId, BuffId } from "./ability";
 import { ItemId } from "./item";
+import { Widget } from "./widget";
 
 declare enum UnitIntField {
     UNIT_IF_DEFENSE_TYPE,
@@ -158,7 +159,7 @@ declare class UnitStateHelper {
     static GetEventUnitState(): unitstate
 }
 
-declare enum UnitType {
+declare enum UnitClass {
     UNIT_TYPE_HERO,
     UNIT_TYPE_DEAD,
     UNIT_TYPE_STRUCTURE,
@@ -188,47 +189,135 @@ declare enum UnitType {
     UNIT_TYPE_MAGIC_IMMUNE
 }
 
+declare enum UnitEvent {
+    EVENT_UNIT_DAMAGED,
+    EVENT_UNIT_DAMAGING,
+    EVENT_UNIT_DEATH,
+    EVENT_UNIT_DECAY,
+    EVENT_UNIT_DETECTED,
+    EVENT_UNIT_HIDDEN,
+    EVENT_UNIT_SELECTED,
+    EVENT_UNIT_DESELECTED,
+    EVENT_UNIT_STATE_LIMIT,
+    EVENT_UNIT_ACQUIRED_TARGET,
+    EVENT_UNIT_TARGET_IN_RANGE,
+    EVENT_UNIT_ATTACKED,
+    EVENT_UNIT_RESCUED,
+    EVENT_UNIT_CONSTRUCT_CANCEL,
+    EVENT_UNIT_CONSTRUCT_FINISH,
+    EVENT_UNIT_UPGRADE_START,
+    EVENT_UNIT_UPGRADE_CANCEL,
+    EVENT_UNIT_UPGRADE_FINISH,
+    EVENT_UNIT_TRAIN_START,
+    EVENT_UNIT_TRAIN_CANCEL,
+    EVENT_UNIT_TRAIN_FINISH,
+    EVENT_UNIT_RESEARCH_START,
+    EVENT_UNIT_RESEARCH_CANCEL,
+    EVENT_UNIT_RESEARCH_FINISH,
+    EVENT_UNIT_ISSUED_ORDER,
+    EVENT_UNIT_ISSUED_POINT_ORDER,
+    EVENT_UNIT_ISSUED_TARGET_ORDER,
+    EVENT_UNIT_HERO_LEVEL,
+    EVENT_UNIT_HERO_SKILL,
+    EVENT_UNIT_HERO_REVIVABLE,
+    EVENT_UNIT_HERO_REVIVE_START,
+    EVENT_UNIT_HERO_REVIVE_CANCEL,
+    EVENT_UNIT_HERO_REVIVE_FINISH,
+    EVENT_UNIT_SUMMON,
+    EVENT_UNIT_DROP_ITEM,
+    EVENT_UNIT_PICKUP_ITEM,
+    EVENT_UNIT_USE_ITEM,
+    EVENT_UNIT_LOADED,
+    EVENT_UNIT_SELL,
+    EVENT_UNIT_CHANGE_OWNER,
+    EVENT_UNIT_SELL_ITEM,
+    EVENT_UNIT_SPELL_CHANNEL,
+    EVENT_UNIT_SPELL_CAST,
+    EVENT_UNIT_SPELL_EFFECT,
+    EVENT_UNIT_SPELL_FINISH,
+    EVENT_UNIT_SPELL_ENDCAST,
+    EVENT_UNIT_PAWN_ITEM
+}
+
 declare enum HeroAttribute {
     STR,
     INT,
     AGI
 }
 
-declare class UnitPool {
-    static create(): unitpool
-    destroy(): void
+class UnitPool {
+    constructor(pool: unitpool) {
+        this.pool = pool;
+    }
+    static create(): UnitPool {
+        return new UnitPool(CreateUnitPool());
+    }
+    destroy(): void {
+        DestroyUnitPool(this.pool);
+    }
 
-    addId(unitId: UnitId, weight: number): void
-    removeId(unitId: UnitId): void
-    placeRandom(forWhichPlayer: player, xy: xy, facing: angle): unit
+    pool: unitpool;
 
-    static pickRandomCreep(level: int): UnitId
-    static pickRandomNPBuilding(): UnitId
+    addId(unitId: unitId, weight: number): void {
+        UnitPoolAddUnitType(this.pool, unitId.id, weight);
+    }
+    removeId(unitId: unitId): void {
+        UnitPoolRemoveUnitType(this.pool, unitId.id);
+    }
+    placeRandom(forWhichPlayer: player, xy: xy, facing: angle): unit {
+        return PlaceRandomUnit(this.pool, forWhichPlayer, xy[0], xy[1], facing);
+    }
+
+    static pickRandomCreep(level: int): unitId {
+        return unitId.byId(ChooseRandomCreep(level) as int);
+    }
+    static pickRandomNPBuilding(): unitId {
+        return unitId.byId(ChooseRandomNPBuilding() as int);
+    }
 }
 
-class UnitTypeId {
-    static byId(id: int): UnitTypeId {
+export type unitclass = unittype;
 
+export class unitId {
+    constructor(id: int) {
+        this.id = id;
     }
-    static fromString(unitIdString: string): int
+    static byId(id: int): unitId {
+        return new unitId(id);
+    }
+    static fromString(unitIdString: string): unitId {
+        return this.byId(UnitId(unitIdString) as int);
+    }
 
-    static GetTrainedUnitType(): int
+    static trainedUnitType(): unitId {
+        return this.byId(GetTrainedUnitType() as int);
+    }
 
     id: int;
 
-    toString(unitId: int): string
+    toString(): string {
+        return UnitId2String(this.id);
+    }
 
-    foodMade(unitId: UnitId): int
-    foodUsed(unitId: UnitId): int
-    heroUnitId(unitId: UnitId): boolean
-    unitIdType(unitId: UnitId, whichUnitType: unittype): boolean
+    foodMade(): int {
+        return GetFoodMade(this.id) as int;
+    }
+    foodUsed(): int {
+        return GetFoodUsed(this.id) as int;
+    }
+    heroUnitId(): boolean {
+        return IsHeroUnitId(this.id);
+    }
+    unitIdType(whichUnitType: unitclass): boolean {
+        return IsUnitIdType(this.id, whichUnitType);
+    }
 }
 
 class Unit extends Widget {
     static instByTrig: Map<unit, Unit> = new Map<unit, Unit>();
 
     constructor(unit: unit) {
-        super();
+        super(unit);
         
         this.unit = unit;
         Unit.instByTrig.set(unit, this);
@@ -255,8 +344,8 @@ class Unit extends Widget {
 
         return this.byUnit(unit);
     }
-    static createCorpse(whichPlayer: player, unitid: UnitId, xy: xy, face: angle): Unit {
-        let unit: unit = CreateCorpse(whichPlayer, unitid, xy[0], xy[1], face)
+    static createCorpse(whichPlayer: player, unitid: unitId, xy: xy, face: angle): Unit {
+        let unit: unit = CreateCorpse(whichPlayer, unitid.id, xy[0], xy[1], face)
 
         return this.byUnit(unit);
     }
@@ -380,25 +469,57 @@ class Unit extends Widget {
         RecycleGuardPosition(this.unit);
     }
 
-    booleanField(whichField: unitbooleanfield): boolean
-    intField(whichField: unitintegerfield): int
-    realField(whichField: unitrealfield): number
-    stringField(whichField: unitstringfield): string
+    booleanField(whichField: unitbooleanfield): boolean {
+        return BlzGetUnitBooleanField(this.unit, whichField);
+    }
+    intField(whichField: unitintegerfield): int {
+        return BlzGetUnitIntegerField(this.unit, whichField) as int;
+    }
+    realField(whichField: unitrealfield): number {
+        return BlzGetUnitRealField(this.unit, whichField);
+    }
+    stringField(whichField: unitstringfield): string {
+        return BlzGetUnitStringField(this.unit, whichField);
+    }
 
-    setBooleanField(whichField: unitbooleanfield, value: boolean): boolean
-    setIntField(whichField: unitintegerfield, value: int): boolean
-    setRealField(whichField: unitrealfield, value: number): boolean
-    setStringField(whichField: unitstringfield, value: string): boolean
+    setBooleanField(whichField: unitbooleanfield, value: boolean): boolean {
+        return BlzSetUnitBooleanField(this.unit, whichField, value);
+    }
+    setIntField(whichField: unitintegerfield, value: int): boolean {
+        return BlzSetUnitIntegerField(this.unit, whichField, value);
+    }
+    setRealField(whichField: unitrealfield, value: number): boolean {
+        return BlzSetUnitRealField(this.unit, whichField, value);
+    }
+    setStringField(whichField: unitstringfield, value: string): boolean {
+        return BlzSetUnitStringField(this.unit, whichField, value);
+    }
 
-    weaponBooleanField(whichField: unitweaponbooleanfield, index: int): boolean
-    weaponIntField(whichField: unitweaponintegerfield, index: int): number
-    weaponRealField(whichField: unitweaponrealfield, index: int): number
-    weaponStringField(whichField: unitweaponstringfield, index: int): string
+    weaponBooleanField(whichField: unitweaponbooleanfield, index: int): boolean {
+        return BlzGetUnitWeaponBooleanField(this.unit, whichField, index);
+    }
+    weaponIntField(whichField: unitweaponintegerfield, index: int): int {
+        return BlzGetUnitWeaponIntegerField(this.unit, whichField, index) as int;
+    }
+    weaponRealField(whichField: unitweaponrealfield, index: int): number {
+        return BlzGetUnitWeaponRealField(this.unit, whichField, index);
+    }
+    weaponStringField(whichField: unitweaponstringfield, index: int): string {
+        return BlzGetUnitWeaponStringField(this.unit, whichField, index);
+    }
 
-    setWeaponBooleanField(whichField: unitweaponbooleanfield, index: int, value: boolean): boolean
-    setWeaponIntField(whichField: unitweaponintegerfield, index: int, value: number): boolean
-    setWeaponRealField(whichField: unitweaponrealfield, index: int, value: number): boolean
-    setWeaponStringField(whichField: unitweaponstringfield, index: int, value: string): boolean
+    setWeaponBooleanField(whichField: unitweaponbooleanfield, index: int, value: boolean): boolean {
+        return BlzSetUnitWeaponBooleanField(this.unit, whichField, index, value);
+    }
+    setWeaponIntField(whichField: unitweaponintegerfield, index: int, value: int): boolean {
+        return BlzSetUnitWeaponIntegerField(this.unit, whichField, index, value);
+    }
+    setWeaponRealField(whichField: unitweaponrealfield, index: int, value: number): boolean {
+        return BlzSetUnitWeaponRealField(this.unit, whichField, index, value);
+    }
+    setWeaponStringField(whichField: unitweaponstringfield, index: int, value: string): boolean {
+        return BlzSetUnitWeaponStringField(this.unit, whichField, index, value);
+    }
 
     maxLife(): int {
         return BlzGetUnitMaxHP(this.unit) as int;
@@ -747,7 +868,7 @@ class Unit extends Widget {
     pointValue(): int {
         return GetUnitPointValue(this.unit) as int;
     }
-    pointValueByType(unitType: UnitTypeId): int {
+    pointValueByType(unitType: unitId): int {
         return GetUnitPointValueByType(unitType.id) as int;
     }
     addItem(whichItem: item): boolean {
@@ -801,8 +922,8 @@ class Unit extends Widget {
     owningPlayer(): player {
         return GetOwningPlayer(this.unit);
     }
-    typeId(): UnitTypeId {
-        return UnitTypeId.byId(GetUnitTypeId(this.unit) as int);
+    typeId(): unitId {
+        return unitId.byId(GetUnitTypeId(this.unit) as int);
     }
     race(): race {
         return GetUnitRace(this.unit);
@@ -830,71 +951,193 @@ class Unit extends Widget {
 
         return [x, y];
     }
-    rallyUnit(): unit
-    rallyDestructable(): destructable
+    rallyUnit(): unit {
+        return GetUnitRallyUnit(this.unit);
+    }
+    rallyDestructable(): destructable {
+        return GetUnitRallyDestructable(this.unit);
+    }
 
-    isInGroup(): boolean
-    isInForce(whichForce: force): boolean
+    isInGroup(whichGroup: group): boolean {
+        return IsUnitInGroup(this.unit, whichGroup);
+    }
+    isInForce(whichForce: force): boolean {
+        return IsUnitInForce(this.unit, whichForce);
+    }
 
-    isOwnedByPlayer(whichPlayer: player): boolean
-    isAlly(whichPlayer: player): boolean
-    isEnemy(whichPlayer: player): boolean
-    isVisible(whichPlayer: player): boolean
-    isDetected(whichPlayer: player): boolean
-    isInvisible(whichPlayer: player): boolean
-    isFogged(whichPlayer: player): boolean
-    isMasked(whichPlayer: player): boolean
-    isSelected(whichPlayer: player): boolean
+    isOwnedByPlayer(whichPlayer: player): boolean {
+        return IsUnitOwnedByPlayer(this.unit, whichPlayer);
+    }
+    isAlly(whichPlayer: player): boolean {
+        return IsUnitAlly(this.unit, whichPlayer);
+    }
+    isEnemy(whichPlayer: player): boolean {
+        return IsUnitEnemy(this.unit, whichPlayer);
+    }
+    isVisible(whichPlayer: player): boolean {
+        return IsUnitVisible(this.unit, whichPlayer);
+    }
+    isDetected(whichPlayer: player): boolean {
+        return IsUnitDetected(this.unit, whichPlayer);
+    }
+    isInvisible(whichPlayer: player): boolean {
+        return IsUnitInvisible(this.unit, whichPlayer);
+    }
+    isFogged(whichPlayer: player): boolean {
+        return IsUnitFogged(this.unit, whichPlayer);
+    }
+    isMasked(whichPlayer: player): boolean {
+        return IsUnitMasked(this.unit, whichPlayer);
+    }
+    isSelected(whichPlayer: player): boolean {
+        return IsUnitSelected(this.unit, whichPlayer);
+    }
 
-    isRace(whichRace: race): boolean
-    isType(whichUnitType: unittype): boolean
-    inRangeUnit(otherUnit: unit, distance: number): boolean
-    inRangeXY(circle: circle): boolean
-    hidden(): boolean
-    illusion(): boolean
-    inTransport(whichTransport: unit): boolean
-    loaded(): boolean
-    shareVision(whichPlayer: player, share: boolean): void
-    suspendDecay(suspend: boolean): void
-    addType(whichUnitType: unittype): boolean
-    removeType(whichUnitType: unittype): boolean
-    addAbility(abilityId: AbilId): boolean
-    removeAbility(abilityId: AbilId): boolean
-    makeAbilityPermanent(permanent: boolean, abilityId: AbilId): boolean
-    removeBuffs(removePositive: boolean, removeNegative: boolean): void
-    removeBuffsEx(removePositive: boolean, removeNegative: boolean, magic: boolean, physical: boolean, timedLife: boolean, aura: boolean, autoDispel: boolean): void
-    containsBuffsEx(removePositive: boolean, removeNegative: boolean, magic: boolean, physical: boolean, timedLife: boolean, aura: boolean, autoDispel: boolean): boolean
-    countBuffsEx(removePositive: boolean, removeNegative: boolean, magic: boolean, physical: boolean, timedLife: boolean, aura: boolean, autoDispel: boolean): int
-    addSleep(add: boolean): void
-    canSleep(): boolean
-    addSleepPerm(add: boolean): void
-    canSleepPerm(): boolean
-    sleeping(): boolean
-    wakeUp(): void
-    applyTimedLife(buffId: BuffId, duration: number): void
-    ignoreAlarm(flag: boolean): boolean
-    ignoreAlarmToggled(): boolean
-    setConstructionProgress(constructionPercentage: int): void
-    setUpgradeProgress(upgradePercentage: int): void
-    pauseTimedLife(flag: boolean): void
-    setUsesAltIcon(flag: boolean): void
-    damagePoint(delay: number, circle: circle, amount: number, attack: boolean, ranged: boolean, attackType: attacktype, damageType: damagetype, weaponType: weapontype): boolean
-    damageTarget(target: widget, amount: number, attack: boolean, ranged: boolean, attackType: attacktype, damageType: damagetype, weaponType: weapontype): boolean
+    isRace(whichRace: race): boolean {
+        return IsUnitRace(this.unit, whichRace);
+    }
+    isType(whichUnitType: unitclass): boolean {
+        return IsUnitType(this.unit, whichUnitType);
+    }
+    inRangeUnit(otherUnit: unit, distance: number): boolean {
+        return IsUnitInRange(this.unit, otherUnit, distance);
+    }
+    inRangeXY(circle: circle): boolean {
+        return IsUnitInRangeXY(this.unit, circle[0][0], circle[0][1], circle[1]);
+    }
+    hidden(): boolean {
+        return IsUnitHidden(this.unit);
+    }
+    illusion(): boolean {
+        return IsUnitIllusion(this.unit);
+    }
+    inTransport(whichTransport: unit): boolean {
+        return IsUnitInTransport(this.unit, whichTransport);
+    }
+    loaded(): boolean {
+        return IsUnitLoaded(this.unit);
+    }
+    shareVision(whichPlayer: player, share: boolean): void {
+        UnitShareVision(this.unit, whichPlayer, share);
+    }
+    suspendDecay(suspend: boolean): void {
+        UnitSuspendDecay(this.unit, suspend);
+    }
+    addType(whichUnitType: unitclass): boolean {
+        return UnitAddType(this.unit, whichUnitType);
+    }
+    removeType(whichUnitType: unitclass): boolean {
+        return UnitRemoveType(this.unit, whichUnitType);
+    }
+    addAbility(abilityId: AbilId): boolean {
+        return UnitAddAbility(this.unit, abilityId.id);
+    }
+    removeAbility(abilityId: AbilId): boolean {
+        return UnitRemoveAbility(this.unit, abilityId.id);
+    }
+    makeAbilityPermanent(permanent: boolean, abilityId: AbilId): boolean {
+        return UnitMakeAbilityPermanent(this.unit, permanent, abilityId.id);
+    }
+    removeBuffs(removePositive: boolean, removeNegative: boolean): void {
+        UnitRemoveBuffs(this.unit, removePositive, removeNegative);
+    }
+    removeBuffsEx(removePositive: boolean, removeNegative: boolean, magic: boolean, physical: boolean, timedLife: boolean, aura: boolean, autoDispel: boolean): void {
+        UnitRemoveBuffsEx(this.unit, removePositive, removeNegative, magic, physical, timedLife, aura, autoDispel);
+    }
+    containsBuffsEx(removePositive: boolean, removeNegative: boolean, magic: boolean, physical: boolean, timedLife: boolean, aura: boolean, autoDispel: boolean): boolean {
+        return UnitHasBuffsEx(this.unit, removePositive, removeNegative, magic, physical, timedLife, aura, autoDispel);
+    }
+    countBuffsEx(removePositive: boolean, removeNegative: boolean, magic: boolean, physical: boolean, timedLife: boolean, aura: boolean, autoDispel: boolean): int {
+        return UnitCountBuffsEx(this.unit, removePositive, removeNegative, magic, physical, timedLife, aura, autoDispel) as int;
+    }
 
-    currentOrder(): orderId
-    issueImmediateOrder(order: orderId): boolean
-    issuePointOrder(order: orderId, xy: xy): boolean
-    issueTargetOrder(order: orderId, targetWidget: widget): boolean
-    issueInstantPointOrder(order: orderId, xy: xy, instantTargetWidget: widget): boolean
-    issueInstantTargetOrder(order: orderId, targetWidget: widget, instantTargetWidget: widget): boolean
-    issueBuildOrder(whichPeon: unit, unitId: number, xy: xy): boolean
-    issueNeutralImmediateOrder(forWhichPlayer: player, neutralStructure: unit, unitId: number): boolean
-    issueNeutralPointOrder(forWhichPlayer: player, neutralStructure: unit, unitId: number, xy: xy): boolean
-    issueNeutralTargetOrder(forWhichPlayer: player, neutralStructure: unit, unitId: number, target: widget): boolean
+    addSleep(add: boolean): void {
+        UnitAddSleep(this.unit, add);
+    }
+    canSleep(): boolean {
+        return UnitCanSleep(this.unit);
+    }
+    addSleepPerm(add: boolean): void {
+        UnitAddSleepPerm(this.unit, add);
+    }
+    canSleepPerm(): boolean {
+        return UnitCanSleepPerm(this.unit);
+    }
+    sleeping(): boolean {
+        return UnitIsSleeping(this.unit);
+    }
+    wakeUp(): void {
+        UnitWakeUp(this.unit);
+    }
 
-    setResourceAmount(amount: number): void
-    addResourceAmount(amount: number): void
-    resourceAmount(): number
+    applyTimedLife(buffId: BuffId, duration: number): void {
+        UnitApplyTimedLife(this.unit, buffId.id, duration);
+    }
+    ignoreAlarm(flag: boolean): boolean {
+        return UnitIgnoreAlarm(this.unit, flag);
+    }
+    ignoreAlarmToggled(): boolean {
+        return UnitIgnoreAlarmToggled(this.unit);
+    }
+    setConstructionProgress(constructionPercentage: int): void {
+        UnitSetConstructionProgress(this.unit, constructionPercentage);
+    }
+    setUpgradeProgress(upgradePercentage: int): void {
+        UnitSetUpgradeProgress(this.unit, upgradePercentage);
+    }
+    pauseTimedLife(flag: boolean): void {
+        UnitPauseTimedLife(this.unit, flag);
+    }
+    setUsesAltIcon(flag: boolean): void {
+        UnitSetUsesAltIcon(this.unit, flag);
+    }
+    damagePoint(delay: number, circle: circle, amount: number, attack: boolean, ranged: boolean, attackType: attacktype, damageType: damagetype, weaponType: weapontype): boolean {
+        return UnitDamagePoint(this.unit, delay, circle[1], circle[0][0], circle[0][1], amount, attack, ranged, attackType, damageType, weaponType);
+    }
+    damageTarget(target: widget, amount: number, attack: boolean, ranged: boolean, attackType: attacktype, damageType: damagetype, weaponType: weapontype): boolean {
+        return UnitDamageTarget(this.unit, target, amount, attack, ranged, attackType, damageType, weaponType);
+    }
+
+    currentOrder(): orderId {
+        return orderId.byId(GetUnitCurrentOrder(this.unit) as int);
+    }
+    issueImmediateOrder(order: orderId): boolean {
+        return IssueImmediateOrderById(this.unit, order.id);
+    }
+    issuePointOrder(order: orderId, xy: xy): boolean {
+        return IssuePointOrderById(this.unit, order.id, xy[0], xy[1]);
+    }
+    issueTargetOrder(order: orderId, targetWidget: widget): boolean {
+        return IssueTargetOrderById(this.unit, order.id, targetWidget);
+    }
+    issueInstantPointOrder(order: orderId, xy: xy, instantTargetWidget: widget): boolean {
+        return IssueInstantPointOrderById(this.unit, order.id, xy[0], xy[1], instantTargetWidget);
+    }
+    issueInstantTargetOrder(order: orderId, targetWidget: widget, instantTargetWidget: widget): boolean {
+        return IssueInstantTargetOrderById(this.unit, order.id, targetWidget, instantTargetWidget);
+    }
+    issueBuildOrder(whichPeon: unit, unitId: unitId, xy: xy): boolean {
+        return IssueBuildOrderById(this.unit, unitId.id, xy[0], xy[1]);
+    }
+    issueNeutralImmediateOrder(forWhichPlayer: player, unitId: unitId): boolean {
+        return IssueNeutralImmediateOrderById(forWhichPlayer, this.unit, unitId.id);
+    }
+    issueNeutralPointOrder(forWhichPlayer: player, unitId: unitId, xy: xy): boolean {
+        return IssueNeutralPointOrderById(forWhichPlayer, this.unit, unitId.id, xy[0], xy[1]);
+    }
+    issueNeutralTargetOrder(forWhichPlayer: player, unitId: unitId, target: widget): boolean {
+        return IssueNeutralTargetOrderById(forWhichPlayer, this.unit, unitId.id, target);
+    }
+
+    resourceAmount(): int {
+        return GetResourceAmount(this.unit) as int;
+    }
+    setResourceAmount(amount: int): void {
+        SetResourceAmount(this.unit, amount);
+    }
+    addResourceAmount(amount: int): void {
+        AddResourceAmount(this.unit, amount);
+    }
 
     waygateDestinationX(): number {
         return WaygateGetDestinationX(this.unit);
@@ -915,24 +1158,56 @@ class Unit extends Widget {
         WaygateActivate(this.unit, enable);
     }
 
-    addItemToAllStock(itemId: ItemId, currentStock: int, stockMax: int): void
-    addItemToStock(itemId: ItemId, currentStock: int, stockMax: int): void
-    addUnitIdToAllStock(unitId: UnitId, currentStock: int, stockMax: int): void
-    addUnitIdToStock(unitId: UnitId, currentStock: int, stockMax: int): void
-    removeItemFromAllStock(itemId: ItemId): void
-    removeItemFromStock(itemId: ItemId): void
-    removeUnitIdFromAllStock(unitId: UnitId): void
-    removeUnitIdFromStock(unitId: UnitId): void
-    setAllItemIdSlots(slots: int): void
-    setAllUnitIdSlots(slots: int): void
-    setItemIdSlots(slots: int): void
-    setUnitIdSlots(slots: int): void
+    static addItemToAllStock(itemId: ItemId, currentStock: int, stockMax: int): void {
+        AddItemToAllStock(itemId.id, currentStock, stockMax);
+    }
+    addItemToStock(itemId: ItemId, currentStock: int, stockMax: int): void {
+        AddItemToStock(this.unit, itemId.id, currentStock, stockMax);
+    }
+    static addUnitIdToAllStock(unitId: unitId, currentStock: int, stockMax: int): void {
+        AddUnitToAllStock(unitId.id, currentStock, stockMax);
+    }
+    addUnitIdToStock(unitId: unitId, currentStock: int, stockMax: int): void {
+        AddUnitToStock(this.unit, unitId.id, currentStock, stockMax);
+    }
+    static removeItemFromAllStock(itemId: ItemId): void {
+        RemoveItemFromAllStock(itemId.id);
+    }
+    removeItemFromStock(itemId: ItemId): void {
+        RemoveItemFromStock(this.unit, itemId.id);
+    }
+    static removeUnitIdFromAllStock(unitId: unitId): void {
+        RemoveUnitFromAllStock(unitId.id);
+    }
+    removeUnitIdFromStock(unitId: unitId): void {
+        RemoveUnitFromStock(this.unit, unitId.id);
+    }
+    static setAllItemIdSlots(slots: int): void {
+        SetAllItemTypeSlots(slots);
+    }
+    static setAllUnitIdSlots(slots: int): void {
+        SetAllUnitTypeSlots(slots);
+    }
+    setItemIdSlots(slots: int): void {
+        SetItemTypeSlots(this.unit, slots);
+    }
+    setUnitIdSlots(slots: int): void {
+        SetUnitTypeSlots(this.unit, slots);
+    }
 
-    ability(abilId: AbilId): ability
-    abilityByIndex(index: int): ability
-    pauseEx(flag: boolean): void
+    ability(abilId: AbilId): ability {
+        return BlzGetUnitAbility(this.unit, abilId.id);
+    }
+    abilityByIndex(index: int): ability {
+        return BlzGetUnitAbilityByIndex(this.unit, index);
+    }
+    pauseEx(flag: boolean): void {
+        BlzPauseUnitEx(this.unit, flag);
+    }
 
-    addIndicator(rgba: rgba): void
+    addIndicator(rgba: rgba): void {
+        UnitAddIndicator(this.unit, rgba[0], rgba[1], rgba[2], rgba[3]);
+    }
 }
 
 class Group {

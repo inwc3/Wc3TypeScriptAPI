@@ -1,3 +1,5 @@
+import { int, xy, xyz, rgb, rgba } from "./util";
+
 declare enum LimitOp {
     LESS_THAN,
     LESS_THAN_OR_EQUAL,
@@ -7,21 +9,22 @@ declare enum LimitOp {
     NOT_EQUAL
 }
 
-declare function bitOr(x: number, y: number): number {
-    return BlzBitOr(x, y);
+function bitOr(xy: xy): number {
+    return BlzBitOr(xy[0], xy[1]);
 }
-declare function bitAnd(x: number, y: number): number {
-    return BlzBitAnd(x, y);
+function bitAnd(xy: xy): number {
+    return BlzBitAnd(xy[0], xy[1]);
 }
-declare function bitXor(x: number, y: number): number {
-    return BlzBitXor(x, y);
+function bitXor(xy: xy): number {
+    return BlzBitXor(xy[0], xy[1]);
 }
-
-//declare class math
 
 function randomInt(lowBound: int, highBound: int): int {
-    return math.random(lowBound, highBound);
+    return (Math.floor(Math.random() * (highBound - lowBound + 1)) + lowBound) as int;
 }
-declare function randomReal(lowBound: number, highBound: number): number {
-    return lowBound + math.random() % (highBound - lowBound);
+function randomReal(lowBound: number, highBound: number): number {
+    return lowBound + Math.random() % (highBound - lowBound + 1);
 }
+
+export type angle = number;
+export type circle = [xy, number];

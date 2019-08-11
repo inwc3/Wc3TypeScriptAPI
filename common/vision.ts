@@ -1,28 +1,46 @@
+import { int, xy, xyz, rgb, rgba } from "./util";
+
 declare enum FogState {
     FOG_OF_WAR_MASKED,
     FOG_OF_WAR_FOGGED,
     FOG_OF_WAR_VISIBLE
 }
 
-setFogStateRect(forWhichPlayer: player, whichState: fogstate, where: rect, useSharedVision: boolean): void
-setFogStateRadius(forWhichPlayer: player, whichState: fogstate, centerx: number, centerY: number, radius: number, useSharedVision: boolean): void
-setFogStateRadiusXY(forWhichPlayer: player, whichState: fogstate, centerxy: [number, number], radius: number, useSharedVision: boolean): void
+function setFogStateRect(forWhichPlayer: player, whichState: fogstate, where: rect, useSharedVision: boolean): void {
+    SetFogStateRect(forWhichPlayer, whichState, where, useSharedVision);
+}
+function setFogStateRadius(forWhichPlayer: player, whichState: fogstate, centerxy: xy, radius: number, useSharedVision: boolean): void {
+    SetFogStateRadius(forWhichPlayer, whichState, centerxy[0], centerxy[1], radius, useSharedVision);
+}
 
-fogMaskEnable(enable: boolean): void
-isFogMaskEnabled(): boolean
-fogEnable(enable: boolean): void
-isFogEnabled(): boolean
+function isFogEnabled(): boolean {
+    return IsFogEnabled();
+}
+function enableFog(enable: boolean): void {
+    FogEnable(enable);
+}
+function isFogMaskEnabled(): boolean {
+    return IsFogMaskEnabled();
+}
+function enableFogMask(enable: boolean): void {
+    FogMaskEnable(enable);
+}
 
 class FogModifier {
-    constructor(forWhichPlayer: player, whichState: fogstate, where: rect, useSharedVision: boolean, afterUnits: boolean): fogmodifier {
-        this.mod = CreateFogModifierRect(forWhichPlayer, whichState, where, useSharedVision, afterUnits);
+    static createRect(forWhichPlayer: player, whichState: fogstate, where: rect, useSharedVision: boolean, afterUnits: boolean): FogModifier {
+        return new FogModifier(CreateFogModifierRect(forWhichPlayer, whichState, where, useSharedVision, afterUnits));
     }
-    constructor(forWhichPlayer: player, whichState: fogstate, centerx: number, centerY: number, radius: number, useSharedVision: boolean, afterUnits: boolean): fogmodifier {
-        this.mod = CreateFogModifierRadius(forWhichPlayer, whichState, centerX, centerY, radius, useSharedVision, afterUnits);
+    static createCircle(forWhichPlayer: player, whichState: fogstate, centerxy: xy, radius: number, useSharedVision: boolean, afterUnits: boolean): FogModifier {
+        return new FogModifier(CreateFogModifierRadius(forWhichPlayer, whichState, centerxy[0], centerxy[1], radius, useSharedVision, afterUnits));
+    }
+    constructor(mod: fogmodifier) {
+        this.mod = mod;
     }
     destroy(): void {
         DestroyFogModifier(this.mod);
     }
+
+    mod: fogmodifier;
 
     start(): void {
         FogModifierStart(this.mod);

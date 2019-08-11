@@ -1,12 +1,30 @@
-declare function eventDamage(damage: number): void
-declare function eventDamageTarget(): unit
-declare function eventAttackType(): attacktype
-declare function eventDamageType(): damagetype
-declare function eventWeaponType(): weapontype
-declare function eventAttackType(attackType: attacktype): boolean
-declare function eventDamageType(damageType: damagetype): boolean
-declare function eventWeaponType(weaponType: weapontype): boolean
-declare function eventDamage(): number
+function eventAttackType(): attacktype {
+    return BlzGetEventAttackType();
+}
+function setEventAttackType(attackType: attacktype): boolean {
+    return BlzSetEventAttackType(attackType);
+}
+function eventDamageType(): damagetype {
+    return BlzGetEventDamageType();
+}
+function setEventDamageType(damageType: damagetype): boolean {
+    return BlzSetEventDamageType(damageType);
+}
+function eventWeaponType(): weapontype {
+    return BlzGetEventWeaponType();
+}
+function setEventWeaponType(weaponType: weapontype): boolean {
+    return BlzSetEventWeaponType(weaponType);
+}
+function eventDamage(): number {
+    return GetEventDamage();
+}
+function setEventDamage(damage: number): void {
+    BlzSetEventDamage(damage);
+}
+function eventDamageTarget(): unit {
+    return BlzGetEventDamageTarget();
+}
 
 declare enum AttackType {
     ATTACK_TYPE_NORMAL,
@@ -87,7 +105,7 @@ declare enum TargetFlag {
 declare enum DefenseType {
     LIGHT,
     MEDIUM,
-    LAREG,
+    LARGE,
     FORT,
     NORMAL,
     HERO,

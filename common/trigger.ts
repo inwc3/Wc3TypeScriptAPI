@@ -1,19 +1,27 @@
-declare class BoolExpr {
-    and(operandA: boolexpr, operandB: boolexpr): boolexpr
-    or(operandA: boolexpr, operandB: boolexpr): boolexpr
-    not(operand: boolexpr): boolexpr
-    create(func: () => boolean): boolexpr
+class BoolExpr {
+    and(operandA: boolexpr, operandB: boolexpr): boolexpr {
+        return And(operandA, operandB);
+    }
+    or(operandA: boolexpr, operandB: boolexpr): boolexpr {
+        return Or(operandA, operandB);
+    }
+    not(operand: boolexpr): boolexpr {
+        return Not(operand);
+    }
+    create(func: () => boolean): boolexpr {
+        return Condition(func);
+    }
 }
 
 class Trigger {
     static instByTrig: Map<trigger, Trigger> = new Map<trigger, Trigger>();
 
+    static create(): Trigger {
+        return new Trigger(CreateTrigger());
+    }
     constructor(trig: trigger) {
-        if (trig == undefined) {
-            trig = CreateTrigger();
-        }
-
         this.trig = trig;
+
         Trigger.instByTrig.set(this.trig, this);
 
         TriggerWaitOnSleeps(this.trig, true);

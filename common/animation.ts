@@ -67,4 +67,11 @@ declare enum SubAnimType {
     SUBANIM_TYPE_BERSERK
 }
 
-declare function animName(whichAnim: animtype): string
+function animName(whichAnim: animtype): string {
+    return BlzGetAnimName(whichAnim);
+}
+
+declare enum RarityControl {
+    RARITY_FREQUENT,
+    RARITY_RARE
+}
